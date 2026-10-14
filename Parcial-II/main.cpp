@@ -22,7 +22,65 @@ int main() {
     vector<Comentario> comentarios = cargarComentarios();
     vector<CarritoDeCompras> carritos;
 
-    // TODO: login y menu
-    (void)usuarios; (void)productos; (void)comentarios; (void)carritos;
+    string correo, contrasena;
+    if (!(cin >> correo >> contrasena)) {
+        cout << "Usuario invalido" << endl;
+        return 0;
+    }
+
+    Usuario usuarioLogueado;
+    if (!iniciarSesion(usuarios, correo, contrasena, usuarioLogueado)) {
+        cout << "Usuario invalido" << endl;
+        return 0;
+    }
+
+    int opcion;
+    while (cin >> opcion) {
+        if (opcion == 0) {
+            break;
+        }
+
+        if (opcion == 1) {
+            vector<Producto> bajoStock = productosBajoStock(productos, 15);
+            for (const auto& p : bajoStock) {
+                cout << p.idProducto << " - " << p.nombre << " | Stock: " << p.stock << " | Precio: " << p.precio << endl;
+            }
+        } else if (opcion == 2) {
+            string fecha;
+            if (cin >> fecha) {
+                vector<Comentario> coms = comentariosDesde(comentarios, fecha);
+                for (const auto& c : coms) {
+                    cout << c.idComentario << " | " << c.usuario << " | " << c.producto << " | " << c.fecha << " | " << c.comentario << endl;
+                }
+            }
+        } else if (opcion == 3) {
+            vector<string> uFormateados = listarUsuariosFormateados(usuarios);
+            for (const auto& line : uFormateados) {
+                cout << line << endl;
+            }
+        } else if (opcion == 4) {
+            int idProd;
+            if (cin >> idProd) {
+                agregarAlCarrito(carritos, productos, usuarioLogueado, idProd);
+            }
+        } else if (opcion == 5) {
+            int idCarritoUsuario = -1;
+            for (const auto& c : carritos) {
+                if (c.usuario.idUsuario == usuarioLogueado.idUsuario) {
+                    idCarritoUsuario = c.idCarrito;
+                    cout << "Subtotal: " << c.subtotal << " | Impuestos: " << c.impuestos << endl;
+                    break;
+                }
+            }
+
+            if (idCarritoUsuario != -1) {
+                vector<Producto> prodsCarrito = listarProductosCarrito(carritos, idCarritoUsuario);
+                for (const auto& p : prodsCarrito) {
+                    cout << p.idProducto << " - " << p.nombre << " | Precio: " << p.precio << endl;
+                }
+            }
+        }
+    }
+
     return 0;
 }
